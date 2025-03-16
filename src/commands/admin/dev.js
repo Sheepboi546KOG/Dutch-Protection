@@ -26,13 +26,14 @@ module.exports = {
       subcommand
         .setName("checks")
         .setDescription("List all developers")),
+ deleted: true,
   run: async (client, interaction) => {
     
     try {
      
       
 
-      
+    
       const subcommand = interaction.options.getSubcommand();
       const user = interaction.user; // Get the user who ran the command
 
