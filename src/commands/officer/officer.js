@@ -652,7 +652,7 @@ module.exports = {
             : "";
       
           // Create the message content for RoundUp
-          const messageContent = `<@&1147980842510061627><@&1147980842543628422><@&1211732581586968676>\n# RDAF Officer Round Up!\n\n${starMessage}\n${targetMessage}\n${officerAddedMessage}\n${officerRemovedMessage}\n` +
+          const messageContent = `<@&1287787309701267519># RDAF Officer Round Up!\n\n${starMessage}\n${targetMessage}\n${officerAddedMessage}\n${officerRemovedMessage}\n` +
             `**This week's summary:**\n` +
             `- Events Hosted: ${roundup.eventsHosted}\n` +
             `- Officers Added: ${roundup.OfficerAdded}\n` +
