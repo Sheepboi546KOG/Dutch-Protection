@@ -414,29 +414,33 @@ module.exports = {
       if (subcommand === "loa_add") {
         const user = interaction.options.getUser("user");
         const reason = interaction.options.getString("reason");
-
+        const loaRoleId = '1314961667863351306';
         if (!member || !member.roles.cache.has(allowedRoleId)) {
           // If the user doesn't have the required role, send an error message
           const embed = new EmbedBuilder()
-            .setColor("#e44144")
-            .setTitle("Unauthorized Access")
-            .setDescription("You do not have permission to use this command.")
-            .setTimestamp();
+        .setColor("#e44144")
+        .setTitle("Unauthorized Access")
+        .setDescription("You do not have permission to use this command.")
+        .setTimestamp();
           return interaction.reply({ embeds: [embed], ephemeral: true });
         }
 
         const officer = await Officer.findOne({ userId: user.id });
         if (!officer) {
           const embed = new EmbedBuilder()
-            .setColor("#e44144")
-            .setTitle("Error")
-            .setDescription(`<@${user.id}> is not an officer.`)
-            .setTimestamp();
+        .setColor("#e44144")
+        .setTitle("Error")
+        .setDescription(`<@${user.id}> is not an officer.`)
+        .setTimestamp();
           return interaction.reply({ embeds: [embed],  });
         }
 
         officer.loa = { status: true, reason };
         await officer.save();
+
+        // Add LOA role to the user
+        const guildMember = interaction.guild.members.cache.get(user.id);
+        await guildMember.roles.add(loaRoleId);
 
         const embed = new EmbedBuilder()
           .setColor("#2da4cc")
@@ -450,11 +454,11 @@ module.exports = {
 
         await user.send({
           embeds: [
-            new EmbedBuilder()
-              .setColor("#2da4cc")
-              .setTitle("Your LOA has been approved!")
-              .setDescription(`Reason: ${reason}\nEnjoy your break!`)
-              .setTimestamp()
+        new EmbedBuilder()
+          .setColor("#2da4cc")
+          .setTitle("Your LOA has been approved!")
+          .setDescription(`Reason: ${reason}\nEnjoy your break!`)
+          .setTimestamp()
           ]
         });
 
@@ -463,29 +467,34 @@ module.exports = {
 
       if (subcommand === "loa_remove") {
         const user = interaction.options.getUser("user");
+        const loaRoleId = '1314961667863351306';
 
         if (!member || !member.roles.cache.has(allowedRoleId)) {
           // If the user doesn't have the required role, send an error message
           const embed = new EmbedBuilder()
-            .setColor("#e44144")
-            .setTitle("Unauthorized Access")
-            .setDescription("You do not have permission to use this command.")
-            .setTimestamp();
+        .setColor("#e44144")
+        .setTitle("Unauthorized Access")
+        .setDescription("You do not have permission to use this command.")
+        .setTimestamp();
           return interaction.reply({ embeds: [embed], ephemeral: true });
         }
 
         const officer = await Officer.findOne({ userId: user.id });
         if (!officer || !officer.loa?.status) {
           const embed = new EmbedBuilder()
-            .setColor("#e44144")
-            .setTitle("Error")
-            .setDescription(`<@${user.id}> doesn't have LOA or isn't an officer.`)
-            .setTimestamp();
+        .setColor("#e44144")
+        .setTitle("Error")
+        .setDescription(`<@${user.id}> doesn't have LOA or isn't an officer.`)
+        .setTimestamp();
           return interaction.reply({ embeds: [embed],  });
         }
 
         officer.loa = { status: false };
         await officer.save();
+
+        // Remove LOA role from the user
+        const guildMember = interaction.guild.members.cache.get(user.id);
+        await guildMember.roles.remove(loaRoleId);
 
         const embed = new EmbedBuilder()
           .setColor("#2da4cc")
@@ -494,13 +503,13 @@ module.exports = {
           .setTimestamp();
 
           await user.send({
-            embeds: [
-              new EmbedBuilder()
-                .setColor("#2da4cc")
-                .setTitle("LOA concluded.")
-                .setDescription(`Your LOA has been removed/ended. Your Quota has now returned. If you need an extension, please say so in https://discord.com/channels/1147980842484903988/1150938373108813864.`)
-                .setTimestamp()
-            ]
+        embeds: [
+          new EmbedBuilder()
+            .setColor("#2da4cc")
+            .setTitle("LOA concluded.")
+            .setDescription(`Your LOA has been removed/ended. Your Quota has now returned. If you need an extension, please say so in https://discord.com/channels/1147980842484903988/1150938373108813864.`)
+            .setTimestamp()
+        ]
           });
 
         await webhook.send({
