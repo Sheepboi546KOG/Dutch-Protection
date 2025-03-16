@@ -111,49 +111,6 @@ module.exports = {
           const attendeesEmbedMessage = attendeesMsg;
           await attendeesEmbedMessage.delete();
           if (buttonInteraction.customId === "done") {
-            // Logic for Rally-specific processing
-            if (eventType === "Rally") {
-              const officers = await Officer.find({ guildId: interaction.guild.id });
-              const rallyEmbed = await client.channels.fetch("1344374728151928933").then((channel) =>
-                channel.messages.fetch({ limit: 100 }).then((messages) => {
-                  const lastMessage = messages.find(
-                    (message) => message.embeds.length > 0 && message.embeds[0].title === "Rally Log"
-                  );
-                  return lastMessage;
-                })
-              );
-
-              if (rallyEmbed) {
-                const rallyEmbedData = rallyEmbed.embeds[0];
-
-                let rallyAttendees = [];
-                officers.forEach((officer) => {
-                  let status = "❌"; // Default status is ❌ (Not Attended)
-
-                  if (attendees.includes(`<@${officer.userId}>`) || officer.rallyLOA === true || officer.loa?.status === true) {
-                    status = "✅"; // Attended or excused (LOA or rallyLOA)
-                  }
-
-                  rallyAttendees.push(`<@${officer.userId}> - ${status} ${officer.rallyLOA ? "(Rally LOA)" : (officer.loa?.status == true ? "(On LOA)" : "")}`);
-                });
-
-                const updatedRallyEmbed = new EmbedBuilder(rallyEmbedData)
-                  .setDescription("Attendees for the rally event.")
-                  .addFields({ name: "Rally Attendees", value: rallyAttendees.join("\n") || "No attendees logged." });
-
-                await rallyEmbed.edit({ embeds: [updatedRallyEmbed] });
-              } else {
-                const rallyEmbed = new EmbedBuilder()
-                  .setColor("#0099ff")
-                  .setTitle("Rally Attendance")
-                  .setDescription("Attendees for the rally event.")
-                  .addFields({ name: "Rally Attendees", value: "No attendees logged." })
-                  .setTimestamp();
-
-                const eventChannel = await client.channels.fetch(channelId);
-                await eventChannel.send({ embeds: [rallyEmbed] });
-              }
-            }
 
             // General event details
             const finalEmbed = new EmbedBuilder()
@@ -170,7 +127,26 @@ module.exports = {
 
             const eventChannel = await client.channels.fetch(channelId);
             const eventMessage = await eventChannel.send({ embeds: [finalEmbed] });
+            
+            if (eventType === "Rally") {
+              const officers = await Officer.find({ guildId: interaction.guild.id });
+              const excusedOfficers = officers.filter(officer => officer.rallyLOA || officer.LOA);
+              const excusedOfficerMentions = excusedOfficers.map(officer => `<@${officer.userId}>`);
 
+              const failedToAttend = officers.filter(officer => 
+                !attendees.includes(`<@${officer.userId}>`) && 
+                !excusedOfficerMentions.includes(`<@${officer.userId}>`)
+              );
+              const failedToAttendMentions = failedToAttend.map(officer => `<@${officer.userId}>`);
+
+              if (eventType === "Rally") 
+                finalEmbed.addFields(
+                  { name: "Attended/Excused Officers", value: excusedOfficerMentions.join("\n") || "None" },
+                  { name: "Failed to Attend", value: failedToAttendMentions.join("\n") || "None" }
+                );
+              }
+
+            await eventChannel.send(finalEmbed);
             if (seaHr1) {
               const currentDate = moment().format("MM/DD/YY");
               const attendeesCount = attendees.length >= 5 ? "5+" : "No";
