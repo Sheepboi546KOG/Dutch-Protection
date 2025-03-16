@@ -641,7 +641,7 @@ module.exports = {
               
           const targetMessage = (roundup.eventsHosted < 3) 
             ? "🎯 Let's try and push for more events this week, as less than 3 were hosted!" 
-            : "🎯 Events were good this week; however, a few more would be great!";
+            : "🎯 Events were good this week; lets try push this week for more recruitment!";
               
           const officerAddedMessage = (roundup.OfficerAdded >= 1) 
             ? "We've also inducted some new officers, please welcome them warmly!" 
