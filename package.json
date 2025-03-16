@@ -1,0 +1,22 @@
+{
+  "name": "dutch-defense",
+  "version": "1.0.0",
+  "description": "RDAFs main bot!",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.7.9",
+    "colors": "^1.4.0",
+    "discord.js": "^14.17.3",
+    "dotenv": "^16.4.7",
+    "moment": "^2.30.1",
+    "mongoose": "^8.9.5",
+    "nodemon": "^3.1.9",
+    "pm2": "^5.4.3",
+    "uuid": "^11.0.5"
+  }
+}
