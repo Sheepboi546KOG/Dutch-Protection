@@ -131,7 +131,7 @@ module.exports = {
                 .setTitle("Unauthorized Access")
                 .setDescription("You do not have permission to use this command.")
                 .setTimestamp();
-            return interaction.reply({ embeds: [embed], ephemeral: true });
+            return interaction.reply({ embeds: [embed]});
         }
     
         const existingOfficer = await Officer.findOne({ userId: user.id });
@@ -141,7 +141,7 @@ module.exports = {
                 .setTitle("Error")
                 .setDescription(`<@${user.id}> is already an officer.`)
                 .setTimestamp();
-            return interaction.reply({ embeds: [embed], ephemeral: true });
+            return interaction.reply({ embeds: [embed],  });
         }
     
         const officer = new Officer({
@@ -152,7 +152,7 @@ module.exports = {
     
         try {
             // Defer the reply to avoid timeout while processing the request
-            await interaction.deferReply({ ephemeral: true });
+            await interaction.deferReply({  });
     
             // Save officer to the database
             await officer.save();
@@ -274,7 +274,7 @@ module.exports = {
             .setTitle("Unauthorized Access")
             .setDescription("You do not have permission to use this command.")
             .setTimestamp();
-          return interaction.reply({ embeds: [embed], ephemeral: true });
+          return interaction.reply({ embeds: [embed] });
         }
       
         const officer = await Officer.findOne({ userId: user.id });
@@ -284,7 +284,7 @@ module.exports = {
             .setTitle("Error")
             .setDescription(`<@${user.id}> is not an officer.`)
             .setTimestamp();
-          return interaction.reply({ embeds: [embed], ephemeral: true });
+          return interaction.reply({ embeds: [embed],  });
         }
       
         // Update rank and rankUpdate timestamp
@@ -380,7 +380,7 @@ module.exports = {
             .setTitle("Error")
             .setDescription(`<@${user.id}> is not registered as an officer.`)
             .setTimestamp();
-          return interaction.reply({ embeds: [embed], ephemeral: true });
+          return interaction.reply({ embeds: [embed],  });
         }
       
         // Calculate the difference in events
@@ -432,7 +432,7 @@ module.exports = {
             .setTitle("Error")
             .setDescription(`<@${user.id}> is not an officer.`)
             .setTimestamp();
-          return interaction.reply({ embeds: [embed], ephemeral: true });
+          return interaction.reply({ embeds: [embed],  });
         }
 
         officer.loa = { status: true, reason };
@@ -481,7 +481,7 @@ module.exports = {
             .setTitle("Error")
             .setDescription(`<@${user.id}> doesn't have LOA or isn't an officer.`)
             .setTimestamp();
-          return interaction.reply({ embeds: [embed], ephemeral: true });
+          return interaction.reply({ embeds: [embed],  });
         }
 
         officer.loa = { status: false };
@@ -536,7 +536,7 @@ module.exports = {
             .setTitle("Error")
             .setDescription(`<@${user.id}> is not an officer.`)
             .setTimestamp();
-          return interaction.reply({ embeds: [embed], ephemeral: true });
+          return interaction.reply({ embeds: [embed],  });
         }
       
         // Handle LOA status
@@ -747,12 +747,12 @@ module.exports = {
           return interaction.reply({ embeds: [embed] });
         } catch (error) {
           console.error(error);
-          return interaction.reply({ content: "An error occurred while resetting officer quotas. Please try again.", ephemeral: true });
+          return interaction.reply({ content: "An error occurred while resetting officer quotas. Please try again.",  });
         }
       }
     } catch (error) {
       console.error(error);
-      return interaction.reply({ content: "An error occurred. Please try again.", ephemeral: true });
+      return interaction.reply({ content: "An error occurred. Please try again.",  });
     }
   }
 };
