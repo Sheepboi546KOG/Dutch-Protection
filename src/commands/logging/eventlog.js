@@ -134,19 +134,27 @@ module.exports = {
               const excusedOfficerMentions = excusedOfficers.map(officer => `<@${officer.userId}>`);
 
               const failedToAttend = officers.filter(officer => 
-                !attendees.includes(`<@${officer.userId}>`) && 
-                !excusedOfficerMentions.includes(`<@${officer.userId}>`)
+              !attendees.includes(`<@${officer.userId}>`) && 
+              !excusedOfficerMentions.includes(`<@${officer.userId}>`)
               );
               const failedToAttendMentions = failedToAttend.map(officer => `<@${officer.userId}>`);
 
-              if (eventType === "Rally") 
-                finalEmbed.addFields(
-                  { name: "Attended/Excused Officers", value: excusedOfficerMentions.join("\n") || "None" },
-                  { name: "Failed to Attend", value: failedToAttendMentions.join("\n") || "None" }
-                );
-              }
+              const attendedOfficers = officers.filter(officer => attendees.includes(`<@${officer.userId}>`));
+              const attendedOfficerMentions = attendedOfficers.map(officer => `<@${officer.userId}>`);
 
-            await eventChannel.send(finalEmbed);
+              const newEmbed = new EmbedBuilder()
+              .setTitle("Officer Attendance")
+              .setColor("0099ff")
+              .setDescription("This is the officer attendance for the rally event.")
+              .addFields(
+                { name: "Attended Officers", value: attendedOfficerMentions.join("\n") || "None" },
+                { name: "Excused Officers", value: excusedOfficerMentions.join("\n") || "None" },
+                { name: "Failed to Attend", value: failedToAttendMentions.join("\n") || "None" }
+              );
+
+              await eventChannel.send({ embeds: [newEmbed] });
+            }
+            
             if (seaHr1) {
               const currentDate = moment().format("MM/DD/YY");
               const attendeesCount = attendees.length >= 5 ? "5+" : "No";
@@ -172,7 +180,7 @@ module.exports = {
               }
             }
 
-            const roundup = await RoundUp.findOne({}); // Assuming you have a single RoundUp document
+            const roundup = await RoundUp.findOne({}); 
             if (roundup) {
             roundup.eventsHosted += 1; // Increment by 1
             await roundup.save(); // Save the updated document

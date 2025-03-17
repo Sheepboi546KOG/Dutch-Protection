@@ -1,7 +1,7 @@
-import { SlashCommandBuilder, EmbedBuilder } from "discord.js";
-import axios from "axios";
-import "dotenv/config"; 
-import roundup from "../../schemas/roundup"// Load environment variables
+const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
+const axios = require("axios");
+require("dotenv").config();
+const roundup = require("../../schemas/roundup"); // Load environment variables and the schema
 
 const loggingChannelId = "1149083816317702305"; // Replace with your logging channel ID
 const requiredRoleId = "1283853933562957836"; // Role ID required to run this command
@@ -81,7 +81,7 @@ module.exports = {
         const RoundUp = await roundup.findOne({}); // Assuming you have a single RoundUp document
                 if (RoundUp) {
                   roundup.Bans += 1; // Increment by 1
-                  await roundup.save(); // Save the updated document
+                  await RoundUp.save(); // Save the updated document
                 }
         // Log ban in the logging channel
         const loggingChannel = await client.channels.fetch(loggingChannelId);
