@@ -4,8 +4,8 @@ const strike = require('../commands/moderation/strike');
 const strikeSchema = new mongoose.Schema({
   strikeId: {
     type: String,
-    required: true, // Ensures that strikeId is always present
-    unique: true, // Ensures that strikeId is unique
+    required: true,
+    unique: true, 
   },
   userId: {
     type: String,
@@ -16,8 +16,8 @@ const strikeSchema = new mongoose.Schema({
     required: true,
   },
   image: {
-    type: String, // Stores the image URL if there's an image
-    default: null, // Allows for no image to be attached
+    type: String,
+    default: null,
   },
   removed: {
     type: Boolean,
@@ -29,7 +29,7 @@ const strikeSchema = new mongoose.Schema({
   },
   date: {
     type: Date,
-    default: Date.now, // Stores the creation date of the strike
+    default: Date.now, 
   },
 });
 

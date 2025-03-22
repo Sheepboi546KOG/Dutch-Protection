@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
-const loggingChannelId = "1149083816317702305"; // Replace with your logging channel ID
+const loggingChannelId = "1149083816317702305";
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -11,13 +11,11 @@ module.exports = {
   run: async (client, interaction) => {
     try {
       
-      // Check if the user has IsDev = true
-      const requiredRoleId = "1283853933562957836"; // The role ID required to run this command
+      const requiredRoleId = "1283853933562957836";
 
       const member2 = interaction.guild.members.cache.get(interaction.user.id);
 
       if (!member2 || !member2.roles.cache.has(requiredRoleId)) {
-        // If the user doesn't have the required role, send an error message
         const embed = new EmbedBuilder()
           .setColor("#e44144")
           .setTitle("Unauthorized Access")
@@ -29,7 +27,6 @@ module.exports = {
       const user = interaction.options.getUser("user");
       const reason = interaction.options.getString("reason") || "No reason provided";
 
-      // Unban the user
       try {
         await interaction.guild.members.unban(user, { reason });
       } catch (err) {
@@ -41,10 +38,9 @@ module.exports = {
         return interaction.reply({ embeds: [embed], ephemeral: true });
       }
 
-      // Log the unban action
       const loggingChannel = await client.channels.fetch(loggingChannelId);
       const embed = new EmbedBuilder()
-        .setColor("#2da4cc") // Blue color for unbans
+        .setColor("#2da4cc")
         .setTitle("User Unbanned")
         .setDescription(`**User:** <@${user.id}>\n**Reason:** ${reason}\n**Date:** <t:${Math.floor(Date.now() / 1000)}:F>\n**Unbanned by:** <@${interaction.user.id}>`)
         .setTimestamp();
@@ -64,9 +60,8 @@ module.exports = {
               console.error("Failed to log to webhook:", error);
             }
 
-      // Send confirmation to the interaction
       const embedResponse = new EmbedBuilder()
-        .setColor("#00ff00") // Green color for success
+        .setColor("#00ff00")
         .setTitle("User Unbanned")
         .setDescription(`User <@${user.id}> has been unbanned for: ${reason}`)
         .setTimestamp();

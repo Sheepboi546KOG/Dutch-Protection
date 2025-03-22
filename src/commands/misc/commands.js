@@ -1,8 +1,7 @@
 const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder } = require('discord.js');
-const LogChannel = require('../../schemas/log'); // Import the LogChannel model
-const axios = require('axios'); // Import axios for HTTP requests
-require('dotenv').config(); // Load environment variables from .env file
-
+const LogChannel = require('../../schemas/log'); 
+const axios = require('axios'); 
+require('dotenv').config(); 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('commands')
@@ -10,7 +9,7 @@ module.exports = {
         .toJSON(),
     
     userPermissions: [],
-    botPermissions: [], // No special permissions are needed for this command
+    botPermissions: [], 
     run: async (client, interaction) => {
         try {
 
@@ -23,10 +22,10 @@ module.exports = {
                 .setFooter({ text: `${client.user.username} - Helping RDAF`, iconURL: client.user.displayAvatarURL() })
                 .setTimestamp();
 
-            // Edit the placeholder reply with the bot information embed
+
             await interaction.reply({ embeds: [embed], ephemeral: false });
 
-            // Log event if the log channel exists
+
             const logChannelData = await LogChannel.findOne(); // Get log channel from DB
 
             if (logChannelData) {
@@ -44,15 +43,15 @@ module.exports = {
                 await logChannel.send({ embeds: [logEmbed] });
             }
 
-            // Webhook logging setup
-            const webhookUrl = process.env.WEBHOOK_URL; // Store the webhook URL in the .env file
+         
+            const webhookUrl = process.env.WEBHOOK_URL; 
             const uptime = process.uptime();
             const now =  Math.floor(interaction.createdAt / 1000)
             const logData = {
                 content: `-\nCommand: /commands was executed by <@${interaction.user.id}> at <t:${now}:F> in the main RDAF server.\n-`,
             };
 
-            // Send the log data to the webhook
+       
             try {
                 await axios.post(webhookUrl, logData);
             } catch (error) {

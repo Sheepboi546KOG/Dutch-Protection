@@ -1,9 +1,9 @@
 const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
-const { v4: uuidv4 } = require("uuid");  // Importing uuid package
-const Warning = require("../../schemas/warn"); // Importing the Warning model
-const loggingChannelId = "1149083816317702305"; // Replace with your logging channel ID
-const axios = require('axios'); // Import axios for HTTP requests
-require('dotenv').config(); // Load environment variables from .env file
+const { v4: uuidv4 } = require("uuid");
+const Warning = require("../../schemas/warn");
+const loggingChannelId = "1149083816317702305";
+const axios = require('axios');
+require('dotenv').config();
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -15,31 +15,24 @@ module.exports = {
         .setDescription("Give a warning to a user")
         .addUserOption(option => option.setName("user").setDescription("User to warn").setRequired(true))
         .addStringOption(option => option.setName("reason").setDescription("Reason for the warning").setRequired(true))
-        .addAttachmentOption(option => option.setName("image").setDescription("Image evidence").setRequired(false))) // Optional image
-    
+        .addAttachmentOption(option => option.setName("image").setDescription("Image evidence").setRequired(false)))
     .addSubcommand(subcommand =>
       subcommand
         .setName("check")
         .setDescription("Check all warnings for a user")
         .addUserOption(option => option.setName("user").setDescription("User to check warnings for").setRequired(true)))
-    
     .addSubcommand(subcommand =>
       subcommand
         .setName("remove")
         .setDescription("Remove a warning from a user")
         .addStringOption(option => option.setName("warningid").setDescription("ID of the warning to remove").setRequired(true))
         .addStringOption(option => option.setName("reason").setDescription("Reason for warning removal").setRequired(true))),
-
-
   run: async (client, interaction) => {
     try {
-    
-      // Check if the user has the required role
-      const requiredRoleId = "1283874757586190398"; // The role ID required to run this command
+      const requiredRoleId = "1283874757586190398";
       const member = interaction.guild.members.cache.get(interaction.user.id);
 
       if (!member || !member.roles.cache.has(requiredRoleId)) {
-        // If the user doesn't have the required role, send an error message
         const embed = new EmbedBuilder()
           .setColor("#e44144")
           .setTitle("Unauthorized Access")
@@ -51,29 +44,24 @@ module.exports = {
       const subcommand = interaction.options.getSubcommand();
       const user = interaction.user;
 
-      // Webhook logging setup
       const webhookUrl = process.env.WEBHOOK_URL;
       const webhookUrl2 = process.env.PUNISHWEB_URL;
-      const uptime = process.uptime();
-      const now =  Math.floor(interaction.createdAt / 1000)
+      const now = Math.floor(interaction.createdAt / 1000);
       const logData = {
         content: `-\nCommand: /${subcommand}, underneath the /warn command, was executed by <@${user.id}> at <t:${now}:F> in the main RDAF server.\n-`,
       };
 
-      // Send the log data to the webhook
       try {
         await axios.post(webhookUrl, logData);
       } catch (error) {
         console.error("Failed to log to webhook:", error);
       }
 
-      // Handle /warn give (giving a warning)
       if (subcommand === "give") {
         const warnedUser = interaction.options.getUser("user");
         const reason = interaction.options.getString("reason");
         const image = interaction.options.getAttachment("image");
 
-        // Prevent warning if the user is warning themselves, the bot, or someone with an equal or higher role
         if (warnedUser.id === interaction.user.id) {
           const embed = new EmbedBuilder()
             .setColor("#e44144")
@@ -102,19 +90,17 @@ module.exports = {
           return interaction.reply({ embeds: [embed], ephemeral: true });
         }
 
-        // Generate a unique warning ID
         const warningId = uuidv4();
 
         const newWarning = new Warning({
-          warningId, // Storing the generated unique ID
+          warningId,
           userId: warnedUser.id,
           reason,
-          image: image ? image.url : null, // Save image URL if provided
+          image: image ? image.url : null,
         });
 
         await newWarning.save();
 
-        // Log the warning
         const loggingChannel = await client.channels.fetch(loggingChannelId);
         const embed = new EmbedBuilder()
           .setColor("#e44144")
@@ -125,18 +111,18 @@ module.exports = {
         if (image) embed.setImage(image.url);
 
         loggingChannel.send({ embeds: [embed] });
-         const logData2 = {
-                          content: `**User Warned**\n**User:** <@${warnedUser.id}>\n**Reason:** ${reason}\n**Date:** <t:${Math.floor(Date.now() / 1000)}:F>\n**Warning Officer** <@${interaction.user.id}>\nEvidence can be found in the RDAF punishement logs.`,
-                        };
-                
-                        await axios.post(webhookUrl2, logData2).catch((error) => console.error("Failed to log to webhook:", error));
+        const logData2 = {
+          content: `**User Warned**\n**User:** <@${warnedUser.id}>\n**Reason:** ${reason}\n**Date:** <t:${Math.floor(Date.now() / 1000)}:F>\n**Warning Officer** <@${interaction.user.id}>\nEvidence can be found in the RDAF punishement logs.`,
+        };
 
-                const RoundUp = require("../../schemas/roundup")
-                const roundup = await RoundUp.findOne({}); // Assuming you have a single RoundUp document
-                if (roundup) {
-                  roundup.OfficerRemoved += 1; // Increment by 1
-                  await roundup.save(); // Save the updated document
-                }
+        await axios.post(webhookUrl2, logData2).catch((error) => console.error("Failed to log to webhook:", error));
+
+        const RoundUp = require("../../schemas/roundup");
+        const roundup = await RoundUp.findOne({});
+        if (roundup) {
+          roundup.OfficerRemoved += 1;
+          await roundup.save();
+        }
         const embedResponse = new EmbedBuilder()
           .setColor("#e44144")
           .setTitle("Warning Issued")
@@ -145,11 +131,8 @@ module.exports = {
         return interaction.reply({ embeds: [embedResponse], ephemeral: true });
       }
 
-      // Handle /warn remove (removing a warning)
       if (subcommand === "remove") {
-
         if (!member || !member.roles.cache.has(requiredRoleId)) {
-          // If the user doesn't have the required role, send an error message
           const embed = new EmbedBuilder()
             .setColor("#e44144")
             .setTitle("Unauthorized Access")
@@ -157,7 +140,7 @@ module.exports = {
             .setTimestamp();
           return interaction.reply({ embeds: [embed], ephemeral: true });
         }
-        
+
         const warningId = interaction.options.getString("warningid");
         const removalReason = interaction.options.getString("reason");
 
@@ -170,7 +153,6 @@ module.exports = {
           return interaction.reply({ embeds: [embed], ephemeral: true });
         }
 
-        // Find the warning by its ID
         const warning = await Warning.findOne({ warningId });
 
         if (!warning) {
@@ -182,10 +164,8 @@ module.exports = {
           return interaction.reply({ embeds: [embed], ephemeral: true });
         }
 
-        // Proceed with removing the warning
         await warning.deleteOne({ warningId });
 
-        // Log the warning removal
         const loggingChannel = await client.channels.fetch(loggingChannelId);
         const embed = new EmbedBuilder()
           .setColor("#2da4cc")
@@ -197,11 +177,10 @@ module.exports = {
 
         loggingChannel.send({ embeds: [embed] });
         const logData3 = {
-                  content: `**Strike ID:** ${warningId}\n**User:** <@${warning.userId}>\n**Original Reason:** ${warning.reason}\n**Removal Reason:** ${removalReason}\n**Removing Officer**: <@${interaction.user.id}>\n**Date Removed:** <t:${Math.floor(Date.now() / 1000)}:F>\nEvidence can be found in the RDAF punishement logs.`
-                };
-        
-                await axios.post(webhookUrl2, logData3).catch((error) => console.error("Failed to log to webhook:", error));
-        // Send confirmation to the interaction
+          content: `**Strike ID:** ${warningId}\n**User:** <@${warning.userId}>\n**Original Reason:** ${warning.reason}\n**Removal Reason:** ${removalReason}\n**Removing Officer**: <@${interaction.user.id}>\n**Date Removed:** <t:${Math.floor(Date.now() / 1000)}:F>\nEvidence can be found in the RDAF punishement logs.`,
+        };
+
+        await axios.post(webhookUrl2, logData3).catch((error) => console.error("Failed to log to webhook:", error));
         const embedResponse = new EmbedBuilder()
           .setColor("#2da4cc")
           .setTitle("Warning Removed")
@@ -210,7 +189,6 @@ module.exports = {
         return interaction.reply({ embeds: [embedResponse], ephemeral: true });
       }
 
-      // Handle /warn check (check warnings)
       if (subcommand === "check") {
         const userToCheck = interaction.options.getUser("user");
         const warnings = await Warning.find({ userId: userToCheck.id });

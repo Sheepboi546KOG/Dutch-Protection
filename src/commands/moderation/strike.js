@@ -2,10 +2,10 @@ const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
 const { v4: uuidv4 } = require("uuid");
 const Strike = require("../../schemas/strike");
 const Dev = require("../../schemas/dev");
-const loggingChannelId = "1149083816317702305"; // Replace with your logging channel ID
-const axios = require('axios'); // Import axios for HTTP requests
-require('dotenv').config(); // Load environment variables from .env file
-const roundup = require("../../schemas/roundup")
+const loggingChannelId = "1149083816317702305";
+const axios = require('axios');
+require('dotenv').config();
+const roundup = require("../../schemas/roundup");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -17,14 +17,12 @@ module.exports = {
         .setDescription("Give a strike to a user")
         .addUserOption(option => option.setName("user").setDescription("User to strike").setRequired(true))
         .addStringOption(option => option.setName("reason").setDescription("Reason for the strike").setRequired(true))
-        .addAttachmentOption(option => option.setName("image").setDescription("Image evidence").setRequired(false))) // Optional image
-    
+        .addAttachmentOption(option => option.setName("image").setDescription("Image evidence").setRequired(false)))
     .addSubcommand(subcommand =>
       subcommand
         .setName("check")
         .setDescription("Check all strikes for a user")
         .addUserOption(option => option.setName("user").setDescription("User to check strikes for").setRequired(true)))
-    
     .addSubcommand(subcommand =>
       subcommand
         .setName("remove")
@@ -34,14 +32,11 @@ module.exports = {
 
   run: async (client, interaction) => {
     try {
-      
-      const requiredRoleId = "1283874757586190398"; // The role ID required to run this command
+      const requiredRoleId = "1283874757586190398";
 
-      // Check if the user has the required role
       const member = interaction.guild.members.cache.get(interaction.user.id);
 
       if (!member || !member.roles.cache.has(requiredRoleId)) {
-        // If the user doesn't have the required role, send an error message
         const embed = new EmbedBuilder()
           .setColor("#e44144")
           .setTitle("Unauthorized Access")
@@ -53,29 +48,25 @@ module.exports = {
       const subcommand = interaction.options.getSubcommand();
       const user = interaction.user;
 
-      // Webhook logging setup
       const webhookUrl = process.env.WEBHOOK_URL;
       const webhookUrl2 = process.env.PUNISHWEB_URL;
       const uptime = process.uptime();
-      const now = Math.floor(interaction.createdAt / 1000)
+      const now = Math.floor(interaction.createdAt / 1000);
       const logData = {
         content: `-\nCommand: /${subcommand}, underneath the /strike command, was executed by <@${user.id}> at <t:${now}:F> in the main RDAF server.\n-`,
       };
 
-      // Send the log data to the webhook
       try {
         await axios.post(webhookUrl, logData);
       } catch (error) {
         console.error("Failed to log to webhook:", error);
       }
 
-      // Handle /strike give (giving a strike)
       if (subcommand === "give") {
         const userToStrike = interaction.options.getUser("user");
         const reason = interaction.options.getString("reason");
         const image = interaction.options.getAttachment("image");
 
-        // Prevent striking yourself
         if (userToStrike.id === interaction.user.id) {
           const embed = new EmbedBuilder()
             .setColor("#e44144")
@@ -85,7 +76,6 @@ module.exports = {
           return interaction.reply({ embeds: [embed], ephemeral: true });
         }
 
-        // Prevent striking the bot
         if (userToStrike.id === client.user.id) {
           const embed = new EmbedBuilder()
             .setColor("#e44144")
@@ -95,7 +85,6 @@ module.exports = {
           return interaction.reply({ embeds: [embed], ephemeral: true });
         }
 
-        // Prevent striking someone with a higher role
         const memberToStrike = interaction.guild.members.cache.get(userToStrike.id);
         if (memberToStrike.roles.highest.position >= member.roles.highest.position) {
           const embed = new EmbedBuilder()
@@ -106,19 +95,17 @@ module.exports = {
           return interaction.reply({ embeds: [embed], ephemeral: true });
         }
 
-        // Generate a unique strike ID
         const strikeId = uuidv4();
 
         const newStrike = new Strike({
-          strikeId, // Storing the generated unique ID
+          strikeId,
           userId: userToStrike.id,
           reason,
-          image: image ? image.url : null, // Save image URL if provided
+          image: image ? image.url : null,
         });
 
         await newStrike.save();
 
-        // Log the strike
         const loggingChannel = await client.channels.fetch(loggingChannelId);
         const embed = new EmbedBuilder()
           .setColor("#e44144")
@@ -126,20 +113,20 @@ module.exports = {
           .setDescription(`**Strike:** <@${userToStrike.id}>\n**Reason:** ${reason}\n**Date:** <t:${Math.floor(Date.now() / 1000)}:F>\n**Striking Officer:** <@${interaction.user.id}>\n**Evidence:** ${image ? `See below` : "None"}`)
           .setTimestamp();
 
-          const roundup = await roundup.findOne({}); // Assuming you have a single RoundUp document
-                if (roundup) {
-                  roundup.Strikes += 1; // Increment by 1
-                  await roundup.save(); // Save the updated document
-                }
+        const roundup = await roundup.findOne({});
+        if (roundup) {
+          roundup.Strikes += 1;
+          await roundup.save();
+        }
 
         if (image) embed.setImage(image.url);
 
         loggingChannel.send({ embeds: [embed] });
-         const logData2 = {
-                  content: `**User Striked**\n**User:** <@${userToStrike.id}>\n**Reason:** ${reason}\n**Date:** <t:${Math.floor(Date.now() / 1000)}:F>\n**Striked by:** <@${interaction.user.id}>\nEvidence can be found in the RDAF punishement logs.`,
-                };
-        
-                await axios.post(webhookUrl2, logData2).catch((error) => console.error("Failed to log to webhook:", error));
+        const logData2 = {
+          content: `**User Striked**\n**User:** <@${userToStrike.id}>\n**Reason:** ${reason}\n**Date:** <t:${Math.floor(Date.now() / 1000)}:F>\n**Striked by:** <@${interaction.user.id}>\nEvidence can be found in the RDAF punishement logs.`,
+        };
+
+        await axios.post(webhookUrl2, logData2).catch((error) => console.error("Failed to log to webhook:", error));
         const embedResponse = new EmbedBuilder()
           .setColor("#e44144")
           .setTitle("Strike Issued")
@@ -148,7 +135,6 @@ module.exports = {
         return interaction.reply({ embeds: [embedResponse], ephemeral: true });
       }
 
-      // Handle /strike remove (removing a strike)
       if (subcommand === "remove") {
         const strikeId = interaction.options.getString("strikeid");
         const removalReason = interaction.options.getString("reason");
@@ -162,7 +148,6 @@ module.exports = {
           return interaction.reply({ embeds: [embed], ephemeral: true });
         }
 
-        // Find the strike by its ID
         const strike = await Strike.findOne({ strikeId });
 
         if (!strike) {
@@ -174,7 +159,6 @@ module.exports = {
           return interaction.reply({ embeds: [embed], ephemeral: true });
         }
 
-        // Prevent removing a strike from yourself
         if (strike.userId === interaction.user.id) {
           const embed = new EmbedBuilder()
             .setColor("#e44144")
@@ -184,7 +168,6 @@ module.exports = {
           return interaction.reply({ embeds: [embed], ephemeral: true });
         }
 
-        // Prevent removing a strike from the bot
         if (strike.userId === client.user.id) {
           const embed = new EmbedBuilder()
             .setColor("#e44144")
@@ -194,7 +177,6 @@ module.exports = {
           return interaction.reply({ embeds: [embed], ephemeral: true });
         }
 
-        // Prevent removing a strike from someone with a higher role
         const memberToRemoveStrike = interaction.guild.members.cache.get(strike.userId);
         if (memberToRemoveStrike.roles.highest.position >= member.roles.highest.position) {
           const embed = new EmbedBuilder()
@@ -205,10 +187,8 @@ module.exports = {
           return interaction.reply({ embeds: [embed], ephemeral: true });
         }
 
-        // Proceed with removing the strike
         await strike.deleteOne({ strikeId });
 
-        // Log the strike removal
         const loggingChannel = await client.channels.fetch(loggingChannelId);
         const embed = new EmbedBuilder()
           .setColor("#2da4cc")
@@ -224,7 +204,6 @@ module.exports = {
         };
 
         await axios.post(webhookUrl2, logData3).catch((error) => console.error("Failed to log to webhook:", error));
-        // Send confirmation to the interaction
         const embedResponse = new EmbedBuilder()
           .setColor("#2da4cc")
           .setTitle("Strike Removed")
@@ -233,7 +212,6 @@ module.exports = {
         return interaction.reply({ embeds: [embedResponse], ephemeral: true });
       }
 
-      // Handle /strike check (check strikes)
       if (subcommand === "check") {
         const userToCheck = interaction.options.getUser("user");
         const strikes = await Strike.find({ userId: userToCheck.id });
