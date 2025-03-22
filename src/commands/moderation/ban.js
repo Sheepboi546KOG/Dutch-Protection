@@ -3,7 +3,7 @@ const axios = require("axios");
 require("dotenv/config"); 
 const roundup = require("../../schemas/roundup");
 const loggingChannelId = "1149083816317702305"; 
-const requiredRoleId = "1283853933562957836"; 
+const requiredRoleId = "1283853933562957836"; // Hai :3
 
 module.exports = {
   data: new SlashCommandBuilder()
