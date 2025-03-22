@@ -1,10 +1,9 @@
 import { SlashCommandBuilder, EmbedBuilder } from "discord.js";
 import axios from "axios";
 import "dotenv/config"; 
-import roundup from "../../schemas/roundup"// Load environment variables
-
-const loggingChannelId = "1149083816317702305"; // Replace with your logging channel ID
-const requiredRoleId = "1283853933562957836"; // Role ID required to run this command
+import roundup from "../../schemas/roundup"
+const loggingChannelId = "1149083816317702305"; 
+const requiredRoleId = "1283853933562957836"; 
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -78,12 +77,11 @@ module.exports = {
 
       try {
         await interaction.guild.members.ban(user, { reason });
-        const RoundUp = await roundup.findOne({}); // Assuming you have a single RoundUp document
+        const RoundUp = await roundup.findOne({}); 
                 if (RoundUp) {
-                  roundup.Bans += 1; // Increment by 1
-                  await roundup.save(); // Save the updated document
+                  roundup.Bans += 1; 
+                  await roundup.save(); 
                 }
-        // Log ban in the logging channel
         const loggingChannel = await client.channels.fetch(loggingChannelId);
         if (loggingChannel) {
           const embed = new EmbedBuilder()
@@ -97,7 +95,6 @@ module.exports = {
           loggingChannel.send({ embeds: [embed] });
         }
 
-        // Webhook logging setup
         const webhookUrl = process.env.WEBHOOK_URL;
         const webhookUrl2 = process.env.PUNISHWEB_URL;
         const now = Math.floor(interaction.createdAt / 1000);

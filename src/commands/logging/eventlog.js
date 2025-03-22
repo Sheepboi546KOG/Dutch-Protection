@@ -39,8 +39,7 @@ module.exports = {
       const seaHr1 = interaction.options.getBoolean("sea_hr1");
       const image = interaction.options.getAttachment("image");
       const cohost = interaction.options.getUser("cohost");
-      const channelId = "1148302085713047563"; // This should be your event log channel ID
-
+      const channelId = "1148302085713047563";
       const eventSelectMenu = new ActionRowBuilder().addComponents(
         new StringSelectMenuBuilder()
           .setCustomId("event_type")
@@ -172,10 +171,10 @@ module.exports = {
               }
             }
 
-            const roundup = await RoundUp.findOne({}); // Assuming you have a single RoundUp document
+            const roundup = await RoundUp.findOne({}); 
             if (roundup) {
-            roundup.eventsHosted += 1; // Increment by 1
-            await roundup.save(); // Save the updated document
+            roundup.eventsHosted += 1; 
+            await roundup.save(); 
             }
             await buttonInteraction.reply({
               content: "✅ Event has been logged successfully!",
@@ -200,10 +199,10 @@ module.exports = {
           time: 60000,
         });
 
-        const mentionMessages = []; // Array to hold references to mention messages
+        const mentionMessages = []; 
 
         mentionCollector.on("collect", async (message) => {
-          mentionMessages.push(message); // Store the mention message reference
+          mentionMessages.push(message); 
           const mentionedUsers = message.mentions.users;
           mentionedUsers.forEach((user) => {
             if (!attendees.includes(`<@${user.id}>`)) {
@@ -212,10 +211,10 @@ module.exports = {
           });
         });
 
-        // Cleanup after done or cancel
+  
         attendeeCollector.on("end", async () => {
           for (const msg of mentionMessages) {
-            await msg.delete(); // Delete all mention messages after processing
+            await msg.delete(); 
           }
         });
       });

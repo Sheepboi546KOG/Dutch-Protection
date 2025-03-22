@@ -105,7 +105,7 @@ module.exports = {
               option.setName("events")
                 .setDescription("Events Hosted.")
                 .setRequired(true)
-                .setMinValue(0) // Optional: To ensure only positive values are input
+                .setMinValue(0)
             )),
         
 
@@ -113,11 +113,11 @@ module.exports = {
     try {
       const subcommand = interaction.options.getSubcommand();
       const allowedRoleId = '1339301327569682432'; 
-      const generalOfficerId = '1287787309701267519' // Replace with the actual role ID for reset quota
+      const generalOfficerId = '1287787309701267519'
       const member = interaction.guild.members.cache.get(interaction.user.id);
-      // Webhook Client setup
+     
       const webhook = new WebhookClient({
-        url: 'https://discord.com/api/webhooks/1300805351154909235/qa3XU8ofiT64-94azdTtcGklX2Bunqo9vPYR4yiH9aQD6_WaNWaABj1q_m7y-qPs_t9y' // Replace with your actual webhook URL
+        url: 'https://discord.com/api/webhooks/1300805351154909235/qa3XU8ofiT64-94azdTtcGklX2Bunqo9vPYR4yiH9aQD6_WaNWaABj1q_m7y-qPs_t9y'
       });
 
       if (subcommand === "add") {
@@ -125,7 +125,6 @@ module.exports = {
         const rank = interaction.options.getString("rank");
     
         if (!member || !member.roles.cache.has(allowedRoleId)) {
-            // If the user doesn't have the required role, send an error message
             const embed = new EmbedBuilder()
                 .setColor("#e44144")
                 .setTitle("Unauthorized Access")
@@ -151,30 +150,22 @@ module.exports = {
         });
     
         try {
-            // Defer the reply to avoid timeout while processing the request
             await interaction.deferReply({  });
-    
-            // Save officer to the database
             await officer.save();
-    
-            // Create the success embed for the interaction
             const embed2 = new EmbedBuilder()
                 .setColor("#2da4cc")
                 .setTitle("Officer Added")
                 .setDescription(`User: <@${user.id}>\nRank: ${rank}`)
                 .setTimestamp();
 
-                const roundup = await RoundUp.findOne({}); // Assuming you have a single RoundUp document
+                const roundup = await RoundUp.findOne({});
                 if (roundup) {
-                  roundup.OfficerAdded += 1; // Increment by 1
-                  await roundup.save(); // Save the updated document
+                  roundup.OfficerAdded += 1;
+                  await roundup.save();
                 }
-            // S end webhook notification
             await webhook.send({
                 content: `Command: /add, underneath the /officer command, was executed by <@${interaction.user.id}> at <t:${Math.floor(interaction.createdAt / 1000)}:F> in the main RDAF server. New Officer Added: User: <@${user.id}>, Rank: ${rank}`
             });
-    
-            // Send DM to the new officer
             await user.send({
                 embeds: [
                     new EmbedBuilder()
@@ -184,12 +175,8 @@ module.exports = {
                         .setTimestamp()
                 ]
             });
-    
-            // Now update the deferred reply with the success message
             return interaction.editReply({ embeds: [embed2] });
-    
         } catch (error) {
-            // Handle any errors that occur during the database operation or any other async tasks
             console.error("Error adding officer:", error);
             const errorEmbed = new EmbedBuilder()
                 .setColor("#e44144")
@@ -233,7 +220,6 @@ module.exports = {
         let quotaPassed = false;
         const eventsHosted = officer.eventsHosted || 0;
     
-        // If on LOA, automatically pass quota
         if (officer.loa?.status) {
             quotaPassed = true;
         } else {
@@ -246,10 +232,8 @@ module.exports = {
             }
         }
     
-        // Display ✅ if quota passed, ❌ if not
         let quotaStatus = quotaPassed ? "✅" : "❌";
     
-        // Append (LOA) next to the quota status if on LOA
         if (officer.loa?.status) {
             quotaStatus += " (LOA)";
         }
@@ -268,7 +252,6 @@ module.exports = {
         const newRank = interaction.options.getString("rank");
 
         if (!member || !member.roles.cache.has(allowedRoleId)) {
-          // If the user doesn't have the required role, send an error message
           const embed = new EmbedBuilder()
             .setColor("#e44144")
             .setTitle("Unauthorized Access")
@@ -287,28 +270,24 @@ module.exports = {
           return interaction.reply({ embeds: [embed],  });
         }
       
-        // Update rank and rankUpdate timestamp
         officer.rank = newRank;
-        officer.rankUpdate = Date.now();  // Save the current time as the rankUpdate
+        officer.rankUpdate = Date.now();
       
-        // Save the officer document to the database
         await officer.save();
       
-        // Now that the officer is saved, retrieve the updated officer (to get the new rankUpdate value)
         const updatedOfficer = await Officer.findOne({ userId: user.id });
       
         const embed = new EmbedBuilder()
           .setColor("#2da4cc")
           .setTitle("Officer Updated")
-          .setDescription(`User: <@${user.id}>\nNew Rank: ${newRank}\nRank Update: <t:${Math.floor(updatedOfficer.rankUpdate / 1000)}:F>`)  // Display the updated rank update timestamp
+          .setDescription(`User: <@${user.id}>\nNew Rank: ${newRank}\nRank Update: <t:${Math.floor(updatedOfficer.rankUpdate / 1000)}:F>`)
           .setTimestamp();
         
-          const roundup = await RoundUp.findOne({}); // Assuming you have a single RoundUp document
+          const roundup = await RoundUp.findOne({});
                 if (roundup) {
-                  roundup.OfficerUpdated += 1; // Increment by 1
-                  await roundup.save(); // Save the updated document
+                  roundup.OfficerUpdated += 1;
+                  await roundup.save();
                 }
-        // Send the webhook message with the update information
         await webhook.send({
           content: `Command: /update, underneath the /officer command, was executed by <@${interaction.user.id}> at <t:${Math.floor(interaction.createdAt / 1000)}:F> in the main RDAF server. Officer Rank Updated: User: <@${user.id}>, New Rank: ${newRank}, Rank Update: <t:${Math.floor(updatedOfficer.rankUpdate / 1000)}:F>`
         });
@@ -320,7 +299,6 @@ module.exports = {
     const user = interaction.options.getUser("user");
 
     if (!member || !member.roles.cache.has(allowedRoleId)) {
-        // If the user doesn't have the required role, send an error message
         const embed = new EmbedBuilder()
             .setColor("#e44144")
             .setTitle("Unauthorized Access")
@@ -347,10 +325,10 @@ module.exports = {
         .setDescription(`User: <@${user.id}> has been removed from the officer registry.`)
         .setTimestamp();
 
-        const roundup = await RoundUp.findOne({}); // Assuming you have a single RoundUp document
+        const roundup = await RoundUp.findOne({});
                 if (roundup) {
-                  roundup.OfficerRemoved += 1; // Increment by 1
-                  await roundup.save(); // Save the updated document
+                  roundup.OfficerRemoved += 1;
+                  await roundup.save();
                 }
 
     await webhook.send({
@@ -361,10 +339,9 @@ module.exports = {
 }
       if (subcommand === "event_setter") {
         const user = interaction.options.getUser("user");
-        const eventsHosted = interaction.options.getInteger("events"); // Get the new events count
+        const eventsHosted = interaction.options.getInteger("events");
       
         if (!member || !member.roles.cache.has(allowedRoleId)) {
-          // If the user doesn't have the required role, send an error message
           const embed = new EmbedBuilder()
             .setColor("#e44144")
             .setTitle("Unauthorized Access")
@@ -372,7 +349,6 @@ module.exports = {
             .setTimestamp();
           return interaction.reply({ embeds: [embed], ephemeral: true });
         }
-        // Find the officer
         const officer = await Officer.findOne({ userId: user.id });
         if (!officer) {
           const embed = new EmbedBuilder()
@@ -383,16 +359,12 @@ module.exports = {
           return interaction.reply({ embeds: [embed],  });
         }
       
-        // Calculate the difference in events
         const eventDifference = eventsHosted - officer.eventsHosted;
       
-        // Update eventTotal based on the difference
         officer.eventsTotal += eventDifference;
       
-        // Update eventsHosted to the new value
         officer.eventsHosted = eventsHosted;
       
-        // Save the updated officer data
         await officer.save();
       
         const embed = new EmbedBuilder()
@@ -401,12 +373,10 @@ module.exports = {
           .setDescription(`User: <@${user.id}> now has ${eventsHosted} events hosted. Event Total has been updated to ${officer.eventsTotal}.`)
           .setTimestamp();
       
-        // Send the webhook message
         await webhook.send({
           content: `Command: /event_setter, underneath the /officer command, was executed by <@${interaction.user.id}> at <t:${Math.floor(interaction.createdAt / 1000)}:F> in the main RDAF server.`
         });
       
-        // Send the final response to the user
         return interaction.reply({ embeds: [embed] });
       }
     
@@ -416,7 +386,6 @@ module.exports = {
         const reason = interaction.options.getString("reason");
         const loaRoleId = '1314961667863351306';
         if (!member || !member.roles.cache.has(allowedRoleId)) {
-          // If the user doesn't have the required role, send an error message
           const embed = new EmbedBuilder()
         .setColor("#e44144")
         .setTitle("Unauthorized Access")
@@ -438,7 +407,6 @@ module.exports = {
         officer.loa = { status: true, reason };
         await officer.save();
 
-        // Add LOA role to the user
         const guildMember = interaction.guild.members.cache.get(user.id);
         await guildMember.roles.add(loaRoleId);
 
@@ -470,7 +438,6 @@ module.exports = {
         const loaRoleId = '1314961667863351306';
 
         if (!member || !member.roles.cache.has(allowedRoleId)) {
-          // If the user doesn't have the required role, send an error message
           const embed = new EmbedBuilder()
         .setColor("#e44144")
         .setTitle("Unauthorized Access")
@@ -492,7 +459,7 @@ module.exports = {
         officer.loa = { status: false };
         await officer.save();
 
-        // Remove LOA role from the user
+       
         const guildMember = interaction.guild.members.cache.get(user.id);
         await guildMember.roles.remove(loaRoleId);
 
@@ -522,7 +489,7 @@ module.exports = {
       if (subcommand === "checker") {
 
         if (!member || !member.roles.cache.has(generalOfficerId)) {
-          // If the user doesn't have the required role, send an error message
+       
           const embed = new EmbedBuilder()
             .setColor("#e44144")
             .setTitle("Unauthorized Access")
@@ -535,7 +502,7 @@ module.exports = {
         const Strikes = await Strike.countDocuments({ userId: user.id });
         const Warns = await Warn.countDocuments({ userId: user.id });
       
-        // Find the most recent strike and warning
+       
         const lastStrike = await Strike.findOne({ userId: user.id }).sort({ date: -1 });
         const lastWarn = await Warn.findOne({ userId: user.id }).sort({ date: -1 });
       
@@ -548,15 +515,15 @@ module.exports = {
           return interaction.reply({ embeds: [embed],  });
         }
       
-        // Handle LOA status
+
         const loaStatus = officer.loa.status ? "✔️" : "❌";
       
-        // Handle empty or zero warnings/strikes
+
         const lastStrikeDate = lastStrike ? `<t:${Math.floor(lastStrike.date / 1000)}:F>` : "No Strikes";
         const lastWarnDate = lastWarn ? `<t:${Math.floor(lastWarn.date / 1000)}:F>` : "No Warnings";
       
-        // Get leaderboard based on total events hosted
-        const officers = await Officer.find().sort({ eventsTotal: -1 }); // Sort by total events hosted
+
+        const officers = await Officer.find().sort({ eventsTotal: -1 }); 
         let leaderboard = "";
         let officerRank = null;
       
@@ -586,7 +553,7 @@ module.exports = {
           leaderboard += `**${medal} ${rankSuffix}.** <@${officerItem.userId}> - ${officerItem.eventsTotal} events\n`;
         });
       
-        // If officerRank is null, set a fallback message for user not found in leaderboard
+        
         if (!officerRank) officerRank = "Not found in leaderboard.";
       
         const embed = new EmbedBuilder()
@@ -594,23 +561,23 @@ module.exports = {
           .setTitle("Officer Details")
           .setDescription(`User: <@${user.id}>\nRank: ${officer.rank}\nJoined: <t:${Math.floor(officer.joined / 1000)}:F>\nOn LOA: ${loaStatus}\n\n**Moderation History**\nWarnings: ${Warns > 0 ? Warns : "No Warnings"}\nLast Warning: ${lastWarnDate}\nStrikes: ${Strikes > 0 ? Strikes : "No Strikes"}\nLast Strike: ${lastStrikeDate}\nTotal Moderation Count: ${Warns + Strikes}\n\n**Quota Information**\nCurrent Event Quota: ${getQuotaStatus(officer.rank, officer.eventsHosted)}\nQuotas Failed: ${officer.quotasFailed > 0 ? officer.quotasFailed : "No Quota Failures"}\n\n**Misc**\nAll time events: ${officer.eventsTotal}\nLeaderboard Position: ${officerRank}`)
           
-          .setThumbnail(user.avatarURL()) // Set user's avatar as embed icon
+          .setThumbnail(user.avatarURL()) 
           .setFooter({ text: user.username })
           .setTimestamp();
       
         function getQuotaStatus(rank, eventsHosted) {
           let requiredEvents = 0;
       
-          // Determine the required number of events based on the officer's rank
+        
           if (['E', 'HR1', 'HR2', 'HR3'].includes(rank)) {
             requiredEvents = 1;
           } else if (['HC1', 'HC2', 'HC3'].includes(rank)) {
             requiredEvents = 2;
           } else if (['GS1', 'GS2', 'GS3', 'GS4'].includes(rank)) {
-            requiredEvents = 0;  // GS ranks have no required events
+            requiredEvents = 0;  
           }
       
-          // Display the completed events out of the required quota
+  
           return `${eventsHosted}/${requiredEvents}`;
         }
       
@@ -619,10 +586,9 @@ module.exports = {
       
       if (subcommand === "officer_quota_conclude") {
         try {
-          const allowedRoleId = "1339301327569682432"; // Specific role ID
+          const allowedRoleId = "1339301327569682432"; 
           const member = interaction.guild.members.cache.get(interaction.user.id);
-      
-          // Check if the user has the required role
+    
           if (!member || !member.roles.cache.has(allowedRoleId)) {
             const embed = new EmbedBuilder()
               .setColor("#e44144")
@@ -631,15 +597,14 @@ module.exports = {
               .setTimestamp();
             return interaction.reply({ embeds: [embed], ephemeral: true });
           }
-      
-          // Fetch the existing RoundUp document
+    
           let roundup = await RoundUp.findOne({});
           if (!roundup) {
-            // If no document exists, create one
+        
             roundup = new RoundUp();
           }
       
-          // Fetch the officer data to find the one who hosted the most events
+         
           const officers = await Officer.find({});
           const mostEventsOfficer = officers.reduce((prev, current) => (prev.eventsHosted > current.eventsHosted) ? prev : current, officers[0]);
       
@@ -660,7 +625,7 @@ module.exports = {
             ? "We've sadly lost officer(s), their service to this division was good 🫡" 
             : "";
       
-          // Create the message content for RoundUp
+       
           const messageContent = `<@&1287787309701267519># RDAF Officer Round Up!\n\n${starMessage}\n${targetMessage}\n${officerAddedMessage}\n${officerRemovedMessage}\n` +
             `**This week's summary:**\n` +
             `- Events Hosted: ${roundup.eventsHosted}\n` +
@@ -672,11 +637,11 @@ module.exports = {
             `- Warnings: ${roundup.Warnings}\n\n` +
             `**Most Events Hosted:** <@${mostEventsOfficer ? mostEventsOfficer.userId : "No officers found."}>, Please congratulate them for their hard earned work!`;
       
-          // Fetch the specific channel to send the message
-          const channel = await client.channels.fetch("1147980843785142297"); // Channel ID
-          await channel.send(messageContent); // Send message to the specified channel
+       
+          const channel = await client.channels.fetch("1147980843785142297"); 
+          await channel.send(messageContent); 
       
-          // Reset all RoundUp values to 0
+     
           roundup.eventsHosted = 0;
           roundup.OfficerAdded = 0;
           roundup.OfficerUpdated = 0;
@@ -685,19 +650,19 @@ module.exports = {
           roundup.Strikes = 0;
           roundup.Warnings = 0;
       
-          await roundup.save(); // Save the updated document
+          await roundup.save(); 
       
-          // Officer quota logic
+
           const failedOfficers = [];
           const resetPromises = [];
       
           officers.forEach((officer) => {
-            if (officer.loa?.status) return;  // Skip if officer is on LOA
+            if (officer.loa?.status) return;  
       
             let quotaPassed = false;
             const eventsHosted = officer.eventsHosted || 0;
       
-            // Check if the officer has passed their quota
+           
             if (
               (['E', 'HR1', 'HR2', 'HR3'].includes(officer.rank) && eventsHosted >= 1) ||
               (['HC1', 'HC2', 'HC3'].includes(officer.rank) && eventsHosted >= 2) ||
@@ -706,7 +671,7 @@ module.exports = {
               quotaPassed = true;
             }
       
-            // If the officer failed the quota
+    
             if (!quotaPassed) {
               failedOfficers.push({
                 userId: officer.userId,
@@ -714,7 +679,7 @@ module.exports = {
                 eventsHosted
               });
       
-              // Increment quotasFailed by 1 for officers who failed the quota
+      
               resetPromises.push(
                 Officer.updateOne(
                   { userId: officer.userId },
