@@ -1,7 +1,7 @@
-import { SlashCommandBuilder, EmbedBuilder } from "discord.js";
-import axios from "axios";
-import "dotenv/config"; 
-import roundup from "../../schemas/roundup"
+const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
+const axios = require("axios");
+require("dotenv/config"); 
+const roundup = require("../../schemas/roundup");
 const loggingChannelId = "1149083816317702305"; 
 const requiredRoleId = "1283853933562957836"; 
 
