@@ -117,7 +117,7 @@ module.exports = {
       const member = interaction.guild.members.cache.get(interaction.user.id);
      
       const webhook = new WebhookClient({
-        url: 'https://discord.com/api/webhooks/1300805351154909235/qa3XU8ofiT64-94azdTtcGklX2Bunqo9vPYR4yiH9aQD6_WaNWaABj1q_m7y-qPs_t9y'
+        url: process.env.WEBHOOK_URL
       });
 
       if (subcommand === "add") {
