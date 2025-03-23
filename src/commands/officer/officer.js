@@ -608,25 +608,56 @@ module.exports = {
           const officers = await Officer.find({});
           const mostEventsOfficer = officers.reduce((prev, current) => (prev.eventsHosted > current.eventsHosted) ? prev : current, officers[0]);
       
-          // Determine star and target messages
-          const starMessage = (roundup.eventsHosted > 5) 
+          // Determine star and target message
+
+            const starMessage = (roundup.eventsHosted > 10) 
+            ? "⭐ Incredible week! Over 10 events were hosted, showcasing outstanding dedication and teamwork." 
+            : (roundup.eventsHosted > 7) 
             ? "⭐ Excellent Events this week, many events have been hosted, so excellent work on that." 
-            : "⭐ Good week in RDAF without any issues, we could be better overall; good week.";
-              
-          const targetMessage = (roundup.eventsHosted < 3) 
-            ? "🎯 Let's try and push for more events this week, as less than 3 were hosted!" 
-            : "🎯 Events were good this week; lets try push this week for more recruitment!";
-              
-          const officerAddedMessage = (roundup.OfficerAdded >= 1) 
-            ? "We've also inducted some new officers, please welcome them warmly!" 
-            : "";
-              
-          const officerRemovedMessage = (roundup.OfficerRemoved >= 1) 
-            ? "We've sadly lost officer(s), their service to this division was good 🫡" 
-            : "";
-      
-       
-          const messageContent = `<@&1287787309701267519># RDAF Officer Round Up!\n\n${starMessage}\n${targetMessage}\n${officerAddedMessage}\n${officerRemovedMessage}\n` +
+            : (roundup.eventsHosted > 3) 
+            ? "⭐ Good week in RDAF without any issues, we could be better overall; good week." 
+            : "⭐ A quiet week with fewer events. Let's aim to improve next week.";
+
+            const targetMessage = (roundup.eventsHosted < 2) 
+            ? "🎯 Very few events were hosted this week. Let's make a strong push for more activity!" 
+            : (roundup.eventsHosted < 5) 
+            ? "🎯 Let's try and push for more events this week, as less than 5 were hosted!" 
+            : (roundup.eventsHosted < 8) 
+            ? "🎯 Events were good this week; let's try to push this week for more recruitment!" 
+            : "🎯 Fantastic event turnout this week! Let's keep up the momentum and aim even higher!";
+            
+            const warningMessage = (roundup.Warnings > 5)
+            ? `🔔 There were ${roundup.Warnings} warning(s) issued this week. Even if it was not any HR, we need to work to make RDAF safer!`
+            : (roundup.Warnings > 2)
+            ? `🔔 There were ${roundup.Warnings} warning(s) issued this week. Let's work on reducing this number and keep RDAF safe!`
+            : (roundup.Warnings > 0)
+            ? `🔔 There were ${roundup.Warnings} warning(s) issued this week. Keep an eye on maintaining discipline!`
+            : "🔔 No warnings were issued this week. Excellent behavior all around!";
+            
+            const banMessage = (roundup.Bans > 3)
+            ? `🚫 ${roundup.Bans} ban(s) were issued this week. This is a high number; let's ensure we maintain a welcoming and respectful environment.`
+            : (roundup.Bans > 0)
+            ? `🚫 ${roundup.Bans} ban(s) were issued this week. Let's ensure we maintain a welcoming and respectful environment.`
+            : "🚫 No bans were issued this week. Great job keeping the community safe and respectful!";
+            
+            const mostEventsOfficerMessage = mostEventsOfficer
+            ? `**Most Events Hosted:** <@${mostEventsOfficer.userId}> with ${mostEventsOfficer.eventsHosted} events! Please congratulate them for their hard-earned work!`
+            : "**Most Events Hosted:** No officers hosted events this week. Let's aim to change that next week!";
+            
+            const leaderboardMessage = officers
+            .sort((a, b) => b.eventsHosted - a.eventsHosted)
+            .slice(0, 3)
+            .map((officer, index) => {
+              const medal = index === 0 ? "🥇" : index === 1 ? "🥈" : "🥉";
+              return `${medal} <@${officer.userId}> - ${officer.eventsHosted} events`;
+            })
+            .join("\n") || "No events hosted this week.";
+
+            const quotaFailureMessage = failedOfficers.length > 0
+            ? `❌ The following officers failed their quotas:\n${failedOfficers.map(o => `<@${o.userId}> (Rank: ${o.rank}) - Events Completed: ${o.eventsHosted}`).join("\n")}`
+            : "✅ No officers failed their quotas this week. Outstanding performance!";
+
+            const messageContent = `<@&1287787309701267519> # RDAF Officer Round Up!\n\n${starMessage}\n${targetMessage}\n${officerAddedMessage}\n${officerRemovedMessage}\n${strikeMessage}\n${warningMessage}\n${banMessage}\n\n` +
             `**This week's summary:**\n` +
             `- Events Hosted: ${roundup.eventsHosted}\n` +
             `- Officers Added: ${roundup.OfficerAdded}\n` +
@@ -635,8 +666,9 @@ module.exports = {
             `- Bans: ${roundup.Bans}\n` +
             `- Strikes: ${roundup.Strikes}\n` +
             `- Warnings: ${roundup.Warnings}\n\n` +
-            `**Most Events Hosted:** <@${mostEventsOfficer ? mostEventsOfficer.userId : "No officers found."}>, Please congratulate them for their hard earned work!`;
-      
+            `${mostEventsOfficerMessage}\n\n` +
+            `**Leaderboard:**\n${leaderboardMessage}\n\n` +
+            `${quotaFailureMessage}`;
        
           const channel = await client.channels.fetch("1147980843785142297"); 
           await channel.send(messageContent); 
