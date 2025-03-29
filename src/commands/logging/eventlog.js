@@ -123,29 +123,49 @@ module.exports = {
               )
               .setImage(image.url)
               .setTimestamp();
+           
 
             const eventChannel = await client.channels.fetch(channelId);
             const eventMessage = await eventChannel.send({ embeds: [finalEmbed] });
+            if (!seaHr1) {
+              const send = await eventChannel.send({ content: "<@&1208421829266374686>"})
+            }
+          
+
+if (eventType === "Rally") {
+    const officers = await Officer.find({ guildId: interaction.guild.id });
+
+    // Separate attended, excused, and failed officers
+    const attendedOfficers = officers.filter(officer => attendees.includes(`<@${officer.userId}>`));
+    const excusedOfficers = officers.filter(officer => officer.rallyLOA || officer.loa.status);
+    const failedToAttend = officers.filter(officer => 
+        !attendees.includes(`<@${officer.userId}>`) && 
+        !excusedOfficers.some(excused => excused.userId === officer.userId)
+    );
+
+
+    const attendedMentions = attendedOfficers.map(officer => `<@${officer.userId}>`);
+    const excusedMentions = excusedOfficers.map(officer => `<@${officer.userId}>`);
+    const failedMentions = failedToAttend.map(officer => `<@${officer.userId}>`);
+
+
+    const embed = new EmbedBuilder()
+        .setTitle("Officer Attendance")
+        .setColor("0099ff")
+        .addFields(
+            { name: "✅ Attended Officers", value: attendedMentions.join("\n") || "None", inline: true },
+            { name: "🟡 Excused Officers", value: excusedMentions.join("\n") || "None", inline: true },
+            { name: "❌ Failed to Attend", value: failedMentions.join("\n") || "None", inline: true }
+        )
+        .setTimestamp();
+
+    // Send the embed
+    await eventChannel.send({ embeds: [embed] });
+}
+
+          
+
             
-            if (eventType === "Rally") {
-              const officers = await Officer.find({ guildId: interaction.guild.id });
-              const excusedOfficers = officers.filter(officer => officer.rallyLOA || officer.LOA);
-              const excusedOfficerMentions = excusedOfficers.map(officer => `<@${officer.userId}>`);
-
-              const failedToAttend = officers.filter(officer => 
-                !attendees.includes(`<@${officer.userId}>`) && 
-                !excusedOfficerMentions.includes(`<@${officer.userId}>`)
-              );
-              const failedToAttendMentions = failedToAttend.map(officer => `<@${officer.userId}>`);
-
-              if (eventType === "Rally") 
-                finalEmbed.addFields(
-                  { name: "Attended/Excused Officers", value: excusedOfficerMentions.join("\n") || "None" },
-                  { name: "Failed to Attend", value: failedToAttendMentions.join("\n") || "None" }
-                );
-              }
-
-            await eventChannel.send(finalEmbed);
             if (seaHr1) {
               const currentDate = moment().format("MM/DD/YY");
               const attendeesCount = attendees.length >= 5 ? "5+" : "No";
