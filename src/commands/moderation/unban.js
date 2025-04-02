@@ -1,5 +1,6 @@
 const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
 const loggingChannelId = "1149083816317702305";
+const axios = require("axios");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -51,7 +52,7 @@ module.exports = {
       const uptime = process.uptime();
       const now = Math.floor(interaction.createdAt / 1000)
       const logData = {
-        content: `-\nADMIN COMMAND RAN\nCommand: /ban was executed by <@${interaction.user.id}> at <t:${now}:F> in the main RDAF server.\n<@everyone>`,
+        content: `-\nADMIN COMMAND RAN\nCommand: /unban was executed by <@${interaction.user.id}> at <t:${now}:F> in the main RDAF server.\n`,
       };
 
         try {

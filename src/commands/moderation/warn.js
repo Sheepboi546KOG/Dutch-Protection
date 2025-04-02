@@ -117,12 +117,7 @@ module.exports = {
 
         await axios.post(webhookUrl2, logData2).catch((error) => console.error("Failed to log to webhook:", error));
 
-        const RoundUp = require("../../schemas/roundup");
-        const roundup = await RoundUp.findOne({});
-        if (roundup) {
-          roundup.OfficerRemoved += 1;
-          await roundup.save();
-        }
+
         const embedResponse = new EmbedBuilder()
           .setColor("#e44144")
           .setTitle("Warning Issued")

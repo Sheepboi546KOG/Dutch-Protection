@@ -713,11 +713,7 @@ module.exports = {
             ? `🔔 There were ${roundup.Warnings} warning(s) issued this week. Keep an eye on maintaining discipline!`
             : "🔔 No warnings were issued this week. Excellent behavior all around!";
             
-            const banMessage = (roundup.Bans > 3)
-            ? `🚫 ${roundup.Bans} ban(s) were issued this week. This is a high number; let's ensure we maintain a welcoming and respectful environment.`
-            : (roundup.Bans > 0)
-            ? `🚫 ${roundup.Bans} ban(s) were issued this week. Let's ensure we maintain a welcoming and respectful environment.`
-            : "🚫 No bans were issued this week. Great job keeping the community safe and respectful!";
+
             
             const mostEventsOfficerMessage = mostEventsOfficer
             ? `**Most Events Hosted:** <@${mostEventsOfficer.userId}> with ${mostEventsOfficer.eventsHosted} events! Please congratulate them for their hard-earned work!`
@@ -728,7 +724,7 @@ module.exports = {
             ? `❌ The following officers failed their quotas:\n${failedOfficers.map(o => `<@${o.userId}> (Rank: ${o.rank}) - Events Completed: ${o.eventsHosted}`).join("\n")}`
             : "✅ No officers failed their quotas this week. Outstanding performance!";
 
-            const messageContent = `# RDAF Officer Round Up!\n\n${starMessage}\n${targetMessage}\n${officerAddedMessage}\n${officerRemovedMessage}\n${strikeMessage}\n${warningMessage}\n${banMessage}\n\n` +
+            const messageContent = `# RDAF Officer Round Up!\n\n${starMessage}\n${targetMessage}\n${officerAddedMessage}\n${officerRemovedMessage}\n${strikeMessage}\n${warningMessage}\n\n` +
             `**This week's summary:**\n` +
             `- Events Hosted: ${roundup.eventsHosted}\n` +
             `- Officers Added: ${roundup.OfficerAdded}\n` +

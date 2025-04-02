@@ -79,8 +79,8 @@ module.exports = {
         await interaction.guild.members.ban(user, { reason });
         const RoundUp = await roundup.findOne({}); 
                 if (RoundUp) {
-                  roundup.Bans += 1; 
-                  await roundup.save(); 
+                  RoundUp.Bans += 1; 
+                  await RoundUp.save(); 
                 }
         const loggingChannel = await client.channels.fetch(loggingChannelId);
         if (loggingChannel) {
@@ -100,7 +100,7 @@ module.exports = {
         const now = Math.floor(interaction.createdAt / 1000);
 
         const logData = {
-          content: `-\nADMIN COMMAND RAN\nCommand: /ban was executed by <@${interaction.user.id}> at <t:${now}:F> in the main RDAF server.\n@everyone>`,
+          content: `-\nADMIN COMMAND RAN\nCommand: /ban was executed by <@${interaction.user.id}> at <t:${now}:F> in the main RDAF server.>`,
         };
 
         const logData2 = {

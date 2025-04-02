@@ -113,10 +113,10 @@ module.exports = {
           .setDescription(`**Strike:** <@${userToStrike.id}>\n**Reason:** ${reason}\n**Date:** <t:${Math.floor(Date.now() / 1000)}:F>\n**Striking Officer:** <@${interaction.user.id}>\n**Evidence:** ${image ? `See below` : "None"}`)
           .setTimestamp();
 
-        const roundup = await roundup.findOne({});
-        if (roundup) {
-          roundup.Strikes += 1;
-          await roundup.save();
+        const Roundup = await roundup.findOne({});
+        if (Roundup) {
+          Roundup.Strikes += 1;
+          await Roundup.save();
         }
 
         if (image) embed.setImage(image.url);
